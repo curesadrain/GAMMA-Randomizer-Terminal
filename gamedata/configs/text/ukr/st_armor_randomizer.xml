@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+    <string id="st_armor_randomizer_terminal"><text>Термінал-рандомайзер</text></string>
+    <string id="st_armor_randomizer_terminal_descr"><text>Розміщуваний термінал для генерації випадкових чисел та випадкового вибору броні чи зброї з найближчих схованок. Радіус сканування: 1 / 3 / 5 / 10 / 15 м.</text></string>
+    <string id="st_armor_randomizer_title"><text>Рандомайзер</text></string>
+    <string id="st_armor_randomizer_radius"><text>Радіус:</text></string>
+    <string id="st_armor_randomizer_hint"><text>Оберіть режим.</text></string>
+    <string id="st_armor_randomizer_count"><text>Сканування...</text></string>
+    <string id="st_armor_randomizer_count_fmt"><text>Схованки: %d | Броня: %d | Радіус: %dм</text></string>
+    <string id="st_armor_randomizer_mode_armor"><text>БРОНЯ</text></string>
+    <string id="st_armor_randomizer_mode_number"><text>ЧИСЛО</text></string>
+    <string id="st_armor_randomizer_cat_light"><text>Легка броня</text></string>
+    <string id="st_armor_randomizer_cat_medium"><text>Середня броня</text></string>
+    <string id="st_armor_randomizer_cat_heavy"><text>Важка броня</text></string>
+    <string id="st_armor_randomizer_cat_exo"><text>Екзоскелети</text></string>
+    <string id="st_armor_randomizer_cat_helmet"><text>Шоломи</text></string>
+    <string id="st_armor_randomizer_hint_main"><text>Оберіть категорію або згенеруйте з усієї знайденої броні.</text></string>
+    <string id="st_armor_randomizer_hint_category"><text>%s: знайдено %d</text></string>
+    <string id="st_armor_randomizer_hint_number"><text>Введіть діапазон «Від» і «До», потім згенеруйте число.</text></string>
+    <string id="st_armor_randomizer_from"><text>Від:</text></string>
+    <string id="st_armor_randomizer_to"><text>До:</text></string>
+    <string id="st_armor_randomizer_roll_number"><text>ВИПАДКОВЕ ЧИСЛО</text></string>
+    <string id="st_armor_randomizer_result"><text>РЕЗУЛЬТАТ</text></string>
+    <string id="st_armor_randomizer_roll_all"><text>ВИПАДКОВА З УСІЄЇ БРОНІ</text></string>
+    <string id="st_armor_randomizer_roll_category"><text>ВИПАДКОВА В КАТЕГОРІЇ</text></string>
+    <string id="st_armor_randomizer_none"><text>Підходящої броні не знайдено.</text></string>
+    <string id="st_armor_randomizer_back"><text>НАЗАД</text></string>
+    <string id="st_armor_randomizer_close"><text>ЗАКРИТИ</text></string>
+
+    <string id="st_armor_randomizer_preview"><text>ПОПЕРЕДНІЙ ПЕРЕГЛЯД</text></string>
+    <string id="st_armor_randomizer_preview_empty"><text>Оберіть броню або натисніть «Випадково».</text></string>
+    <string id="st_armor_randomizer_storage_fmt"><text>Схованка: %s</text></string>
+
+    <!-- Weapon tab -->
+    <string id="st_armor_randomizer_mode_weapon"><text>ЗБРОЯ</text></string>
+    <string id="st_armor_randomizer_cat_pistol"><text>Пістолети</text></string>
+    <string id="st_armor_randomizer_cat_smg"><text>Пістолети-кулемети</text></string>
+    <string id="st_armor_randomizer_cat_shotgun"><text>Рушниці та дробовики</text></string>
+    <string id="st_armor_randomizer_cat_rifle"><text>Гвинтівки та автомати</text></string>
+    <string id="st_armor_randomizer_cat_sniper"><text>Снайперські гвинтівки</text></string>
+    <string id="st_armor_randomizer_hint_main_weapon"><text>Оберіть категорію або згенеруйте з усієї знайденої зброї.</text></string>
+    <string id="st_armor_randomizer_count_fmt_weapon"><text>Схованки: %d | Зброя: %d | Радіус: %dм</text></string>
+    <string id="st_armor_randomizer_roll_all_weapon"><text>ВИПАДКОВА ЗБРОЯ З УСІЄЇ</text></string>
+    <string id="st_armor_randomizer_roll_category_weapon"><text>ВИПАДКОВА ЗБРОЯ В КАТЕГОРІЇ</text></string>
+    <string id="st_armor_randomizer_none_weapon"><text>Підходящої зброї не знайдено.</text></string>
+    <string id="st_armor_randomizer_preview_empty_weapon"><text>Оберіть зброю або натисніть «Випадково».</text></string>
+</string_table>
