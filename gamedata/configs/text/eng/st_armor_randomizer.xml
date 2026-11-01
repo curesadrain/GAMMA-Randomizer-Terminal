@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+    <string id="st_armor_randomizer_terminal"><text>Randomizer Terminal</text></string>
+    <string id="st_armor_randomizer_terminal_descr"><text>A placeable terminal for random numbers and randomly selecting armor or weapons from nearby storage containers. Scan radius: 1 / 3 / 5 / 10 / 15 m.</text></string>
+    <string id="st_armor_randomizer_title"><text>Randomizer</text></string>
+    <string id="st_armor_randomizer_radius"><text>Radius:</text></string>
+    <string id="st_armor_randomizer_hint"><text>Select a mode.</text></string>
+    <string id="st_armor_randomizer_count"><text>Scanning...</text></string>
+    <string id="st_armor_randomizer_count_fmt"><text>Storages: %d | Armor: %d | Radius: %dm</text></string>
+    <string id="st_armor_randomizer_mode_armor"><text>ARMOR</text></string>
+    <string id="st_armor_randomizer_mode_number"><text>NUMBER</text></string>
+    <string id="st_armor_randomizer_cat_light"><text>Light armor</text></string>
+    <string id="st_armor_randomizer_cat_medium"><text>Medium armor</text></string>
+    <string id="st_armor_randomizer_cat_heavy"><text>Heavy armor</text></string>
+    <string id="st_armor_randomizer_cat_exo"><text>Exoskeletons</text></string>
+    <string id="st_armor_randomizer_cat_helmet"><text>Helmets</text></string>
+    <string id="st_armor_randomizer_hint_main"><text>Choose a category or roll from all found armor.</text></string>
+    <string id="st_armor_randomizer_hint_category"><text>%s: found %d</text></string>
+    <string id="st_armor_randomizer_hint_number"><text>Enter From and To, then roll.</text></string>
+    <string id="st_armor_randomizer_from"><text>From:</text></string>
+    <string id="st_armor_randomizer_to"><text>To:</text></string>
+    <string id="st_armor_randomizer_roll_number"><text>ROLL RANDOM NUMBER</text></string>
+    <string id="st_armor_randomizer_result"><text>RESULT</text></string>
+    <string id="st_armor_randomizer_roll_all"><text>RANDOM FROM ALL ARMOR</text></string>
+    <string id="st_armor_randomizer_roll_category"><text>RANDOM IN CATEGORY</text></string>
+    <string id="st_armor_randomizer_none"><text>No suitable armor found.</text></string>
+    <string id="st_armor_randomizer_back"><text>BACK</text></string>
+    <string id="st_armor_randomizer_close"><text>CLOSE</text></string>
+
+    <string id="st_armor_randomizer_preview"><text>PREVIEW</text></string>
+    <string id="st_armor_randomizer_preview_empty"><text>Select armor or use Random.</text></string>
+    <string id="st_armor_randomizer_storage_fmt"><text>Storage: %s</text></string>
+
+    <!-- Weapon tab -->
+    <string id="st_armor_randomizer_mode_weapon"><text>WEAPON</text></string>
+    <string id="st_armor_randomizer_cat_pistol"><text>Pistols</text></string>
+    <string id="st_armor_randomizer_cat_smg"><text>SMGs</text></string>
+    <string id="st_armor_randomizer_cat_shotgun"><text>Shotguns</text></string>
+    <string id="st_armor_randomizer_cat_rifle"><text>Rifles</text></string>
+    <string id="st_armor_randomizer_cat_sniper"><text>Sniper rifles</text></string>
+    <string id="st_armor_randomizer_hint_main_weapon"><text>Choose a category or roll from all found weapons.</text></string>
+    <string id="st_armor_randomizer_count_fmt_weapon"><text>Storages: %d | Weapons: %d | Radius: %dm</text></string>
+    <string id="st_armor_randomizer_roll_all_weapon"><text>RANDOM WEAPON FROM ALL</text></string>
+    <string id="st_armor_randomizer_roll_category_weapon"><text>RANDOM WEAPON IN CATEGORY</text></string>
+    <string id="st_armor_randomizer_none_weapon"><text>No suitable weapons found.</text></string>
+    <string id="st_armor_randomizer_preview_empty_weapon"><text>Select a weapon or use Random.</text></string>
+</string_table>

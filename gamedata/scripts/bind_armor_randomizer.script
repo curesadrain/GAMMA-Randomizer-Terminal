@@ -1,0 +1,14 @@
+-- Armor Randomizer Terminal binder.
+-- The Hideout Furniture interaction system requires placed props to be bound
+-- through bind_hf_base.hf_binder_wrapper. Without this binder the object exists
+-- physically, but ui_on_interaction/ui_on_simple_interaction are never exposed.
+
+function init(obj)
+    obj:bind_object(armor_randomizer_wrapper(obj).binder)
+end
+
+class "armor_randomizer_wrapper" (bind_hf_base.hf_binder_wrapper)
+
+function armor_randomizer_wrapper:__init(obj)
+    super(obj)
+end

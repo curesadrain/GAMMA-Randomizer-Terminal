@@ -1,0 +1,566 @@
+local GUI = nil
+local gc = game.translate_string
+local COLOR_DEFAULT = GetARGB(255, 220, 220, 220)
+local COLOR_RESULT = GetARGB(255, 180, 220, 255)
+
+local RADII = {1, 3, 5, 10, 15}
+local DEFAULT_RADIUS = 5
+local last_radius = DEFAULT_RADIUS
+local last_tab = "armor"
+
+local CATEGORY_ORDER = {"light", "medium", "heavy", "exo", "helmet"}
+local CATEGORY_STRING = {
+    light = "st_armor_randomizer_cat_light",
+    medium = "st_armor_randomizer_cat_medium",
+    heavy = "st_armor_randomizer_cat_heavy",
+    exo = "st_armor_randomizer_cat_exo",
+    helmet = "st_armor_randomizer_cat_helmet",
+    pistol = "st_armor_randomizer_cat_pistol",
+    smg = "st_armor_randomizer_cat_smg",
+    shotgun = "st_armor_randomizer_cat_shotgun",
+    rifle = "st_armor_randomizer_cat_rifle",
+    sniper = "st_armor_randomizer_cat_sniper",
+}
+local CATEGORY_FALLBACK = {
+    light = "Light armor",
+    medium = "Medium armor",
+    heavy = "Heavy armor",
+    exo = "Exoskeletons",
+    helmet = "Helmets",
+    pistol = "Pistols",
+    smg = "SMGs",
+    shotgun = "Shotguns",
+    rifle = "Rifles",
+    sniper = "Sniper rifles",
+}
+local WEAPON_CATEGORY_ORDER = {"pistol", "smg", "shotgun", "rifle", "sniper"}
+-- Weapon categories map 1:1 to the item "kind" (same values Hideout Furniture displays use).
+local WEAPON_KIND_TO_CAT = {
+    w_pistol = "pistol",
+    w_smg = "smg",
+    w_shotgun = "shotgun",
+    w_rifle = "rifle",    -- assault rifles and machine guns
+    w_sniper = "sniper",
+}
+
+local function tr(id, fallback)
+    local ok, value = pcall(function() return gc(id) end)
+    if ok and value and value ~= "" and value ~= id then
+        return value
+    end
+    return fallback or id
+end
+
+local function cfg(sec, key)
+    if not sec or sec == "" then return nil end
+    local ok, value = pcall(function() return SYS_GetParam(0, sec, key) end)
+    if ok and value and value ~= "" then return tostring(value) end
+    local ok2, value2 = pcall(function() return ini_sys:r_string_ex(sec, key) end)
+    if ok2 and value2 and value2 ~= "" then return tostring(value2) end
+    return nil
+end
+
+local function localized_item_name(item)
+    if not item then return "?" end
+    local sec = item:section()
+    local inv_name = cfg(sec, "inv_name") or cfg(sec, "inv_name_short")
+    if inv_name then
+        local name = tr(inv_name, nil)
+        if name and name ~= "" and name ~= inv_name then return name end
+    end
+    local ok, name = pcall(function() return item:name() end)
+    if ok and name and name ~= "" then return tostring(name) end
+    return tostring(sec or "?")
+end
+
+local ICON_CELL = 50
+
+local function item_icon_info(section)
+    if not section or section == "" then return nil end
+    local x = tonumber(cfg(section, "inv_grid_x"))
+    local y = tonumber(cfg(section, "inv_grid_y"))
+    local w = tonumber(cfg(section, "inv_grid_width")) or 1
+    local h = tonumber(cfg(section, "inv_grid_height")) or 1
+    if x == nil or y == nil then return nil end
+    local texture = cfg(section, "icons_texture") or [[ui\ui_icon_equipment]]
+    texture = tostring(texture):gsub("%.dds$", "")
+    return {
+        texture = texture,
+        x = x, y = y, w = w, h = h,
+    }
+end
+
+local function classify_armor(item)
+    if not item then return nil end
+    local sec = item:section()
+    local kind = string.lower(tostring(cfg(sec, "kind") or ""))
+    local repair = string.lower(tostring(cfg(sec, "repair_type") or ""))
+
+    -- Exos first: many exos are also kind=o_heavy in Anomaly/GAMMA.
+    if repair == "outfit_exo" or string.find(repair, "outfit_exo", 1, true) then return "exo" end
+    if kind == "o_helmet" or string.find(repair, "helmet", 1, true) then return "helmet" end
+    if kind == "o_light" or repair == "outfit_light" then return "light" end
+    if kind == "o_medium" or repair == "outfit_medium" then return "medium" end
+    if kind == "o_heavy" or repair == "outfit_heavy" then return "heavy" end
+    return nil
+end
+
+local function classify_weapon(item)
+    if not item then return nil end
+    local kind = string.lower(tostring(cfg(item:section(), "kind") or ""))
+    return WEAPON_KIND_TO_CAT[kind]
+end
+
+local function is_inventory_box(obj)
+    if not obj then return false end
+    if IsInvbox then
+        local ok, result = pcall(function() return IsInvbox(obj) end)
+        if ok and result == true then return true end
+        local ok2, result2 = pcall(function() return IsInvbox(nil, obj:clsid()) end)
+        if ok2 and result2 == true then return true end
+    end
+    return false
+end
+
+local function box_label(obj)
+    if not obj then return "Storage" end
+    local ok, name = pcall(function() return obj:name() end)
+    if ok and name and name ~= "" then return tostring(name) end
+    local ok2, id = pcall(function() return obj:id() end)
+    if ok2 and id then return "Storage #" .. tostring(id) end
+    return "Storage"
+end
+
+local function scan_storage(origin_obj, radius)
+    local data = {
+        all = {},
+        light = {}, medium = {}, heavy = {}, exo = {}, helmet = {},
+        weapon_all = {},
+        pistol = {}, smg = {}, shotgun = {}, rifle = {}, sniper = {},
+        boxes = 0,
+    }
+    if not origin_obj or not level or not level.iterate_nearest then return data end
+
+    local origin = origin_obj:position()
+    local seen_boxes = {}
+
+    local function add_box(obj)
+        if not obj or not is_inventory_box(obj) then return end
+        local ok_id, id = pcall(function() return obj:id() end)
+        id = ok_id and id or tostring(obj)
+        if seen_boxes[id] then return end
+        seen_boxes[id] = true
+        data.boxes = data.boxes + 1
+        local storage_name = box_label(obj)
+
+        pcall(function()
+            obj:iterate_inventory_box(function(t, item)
+                if not item then return end
+                local group = "all"
+                local cat = classify_armor(item)
+                if not cat then
+                    cat = classify_weapon(item)
+                    group = "weapon_all"
+                end
+                if not cat then return end
+                local entry = {
+                    id = item:id(),
+                    section = item:section(),
+                    name = localized_item_name(item),
+                    storage = storage_name,
+                    category = cat,
+                    icon = item_icon_info(item:section()),
+                }
+                t[cat][#t[cat] + 1] = entry
+                t[group][#t[group] + 1] = entry
+            end, data)
+        end)
+    end
+
+    pcall(function()
+        level.iterate_nearest(origin, radius, add_box)
+    end)
+
+    local function sorter(a, b)
+        return string.lower(tostring(a.name or "")) < string.lower(tostring(b.name or ""))
+    end
+    table.sort(data.all, sorter)
+    table.sort(data.weapon_all, sorter)
+    for _, cat in ipairs(CATEGORY_ORDER) do table.sort(data[cat], sorter) end
+    for _, cat in ipairs(WEAPON_CATEGORY_ORDER) do table.sort(data[cat], sorter) end
+    return data
+end
+
+class "armor_randomizer_list_item" (CUIListBoxItem)
+function armor_randomizer_list_item:__init(height) super(height)
+    self:SetTextColor(COLOR_DEFAULT)
+    self.txt = self:GetTextItem()
+    self.txt:SetFont(GetFontLetterica16Russian())
+    self.txt:SetEllipsis(true)
+end
+function armor_randomizer_list_item:__finalize() end
+
+class "UIArmorRandomizer" (CUIScriptWnd)
+
+function UIArmorRandomizer:__init() super()
+    self.object_id = nil
+    self.radius = last_radius or DEFAULT_RADIUS
+    self.mode = last_tab == "weapon" and "weapon_main" or "armor_main"
+    self.tab = last_tab or "armor"
+    self.category = nil
+    self.scan = {all={}, light={}, medium={}, heavy={}, exo={}, helmet={}, weapon_all={}, pistol={}, smg={}, shotgun={}, rifle={}, sniper={}, boxes=0}
+    self:InitControls()
+    self:InitCallbacks()
+end
+
+function UIArmorRandomizer:__finalize()
+    GUI = nil
+end
+
+function UIArmorRandomizer:InitControls()
+    self:SetWndRect(Frect():set(0, 0, 1024, 768))
+    self:SetAutoDelete(true)
+    local xml = CScriptXmlInit()
+    xml:ParseFile("ui_armor_randomizer_dialog.xml")
+
+    self.back = xml:InitFrame("background", self)
+    self.title = xml:InitTextWnd("title", self.back)
+    self.radius_label = xml:InitTextWnd("radius_label", self.back)
+    self.mode_hint = xml:InitTextWnd("mode_hint", self.back)
+    self.count = xml:InitTextWnd("count", self.back)
+    self.result_label = xml:InitTextWnd("result_label", self.back)
+    self.result = xml:InitTextWnd("result", self.back)
+    pcall(function() self.result:SetTextColor(COLOR_RESULT) end)
+
+    self.btn_mode_armor = xml:Init3tButton("btn_mode_armor", self.back); self:Register(self.btn_mode_armor, "btn_mode_armor")
+    self.btn_mode_weapon = xml:Init3tButton("btn_mode_weapon", self.back); self:Register(self.btn_mode_weapon, "btn_mode_weapon")
+    self.btn_mode_number = xml:Init3tButton("btn_mode_number", self.back); self:Register(self.btn_mode_number, "btn_mode_number")
+    self.btn_light = xml:Init3tButton("btn_light", self.back); self:Register(self.btn_light, "btn_light")
+    self.btn_medium = xml:Init3tButton("btn_medium", self.back); self:Register(self.btn_medium, "btn_medium")
+    self.btn_heavy = xml:Init3tButton("btn_heavy", self.back); self:Register(self.btn_heavy, "btn_heavy")
+    self.btn_exo = xml:Init3tButton("btn_exo", self.back); self:Register(self.btn_exo, "btn_exo")
+    self.btn_helmet = xml:Init3tButton("btn_helmet", self.back); self:Register(self.btn_helmet, "btn_helmet")
+    self.btn_pistol = xml:Init3tButton("btn_pistol", self.back); self:Register(self.btn_pistol, "btn_pistol")
+    self.btn_smg = xml:Init3tButton("btn_smg", self.back); self:Register(self.btn_smg, "btn_smg")
+    self.btn_shotgun = xml:Init3tButton("btn_shotgun", self.back); self:Register(self.btn_shotgun, "btn_shotgun")
+    self.btn_rifle = xml:Init3tButton("btn_rifle", self.back); self:Register(self.btn_rifle, "btn_rifle")
+    self.btn_sniper = xml:Init3tButton("btn_sniper", self.back); self:Register(self.btn_sniper, "btn_sniper")
+
+    self.btn_r1 = xml:Init3tButton("btn_r1", self.back); self:Register(self.btn_r1, "btn_r1")
+    self.btn_r3 = xml:Init3tButton("btn_r3", self.back); self:Register(self.btn_r3, "btn_r3")
+    self.btn_r5 = xml:Init3tButton("btn_r5", self.back); self:Register(self.btn_r5, "btn_r5")
+    self.btn_r10 = xml:Init3tButton("btn_r10", self.back); self:Register(self.btn_r10, "btn_r10")
+    self.btn_r15 = xml:Init3tButton("btn_r15", self.back); self:Register(self.btn_r15, "btn_r15")
+
+    self.list_frame = xml:InitFrame("list_frame", self.back)
+    self.list_box = xml:InitListBox("list", self.back)
+    self.list_box:ShowSelectedItem(true)
+    self:Register(self.list_box, "armor_list")
+
+    self.preview_frame = xml:InitFrame("preview_frame", self.back)
+    self.preview_title = xml:InitTextWnd("preview_title", self.back)
+    self.preview_icon = xml:InitStatic("preview_icon", self.back)
+    self.preview_name = xml:InitTextWnd("preview_name", self.back)
+    self.preview_storage = xml:InitTextWnd("preview_storage", self.back)
+
+    self.number_from_label = xml:InitTextWnd("number_from_label", self.back)
+    self.number_to_label = xml:InitTextWnd("number_to_label", self.back)
+    self.edit_from = xml:InitEditBox("edit_from", self.back)
+    self.edit_to = xml:InitEditBox("edit_to", self.back)
+    self.btn_number_roll = xml:Init3tButton("btn_number_roll", self.back); self:Register(self.btn_number_roll, "btn_number_roll")
+
+    self.btn_random_all = xml:Init3tButton("btn_random_all", self.back); self:Register(self.btn_random_all, "btn_random_all")
+    self.btn_random_cat = xml:Init3tButton("btn_random_cat", self.back); self:Register(self.btn_random_cat, "btn_random_cat")
+    self.btn_random_all_w = xml:Init3tButton("btn_random_all_w", self.back); self:Register(self.btn_random_all_w, "btn_random_all_w")
+    self.btn_random_cat_w = xml:Init3tButton("btn_random_cat_w", self.back); self:Register(self.btn_random_cat_w, "btn_random_cat_w")
+    self.btn_back = xml:Init3tButton("btn_back", self.back); self:Register(self.btn_back, "btn_back")
+    self.btn_close = xml:Init3tButton("btn_close", self.back); self:Register(self.btn_close, "btn_close")
+
+    pcall(function() self.edit_from:SetText("1") end)
+    pcall(function() self.edit_to:SetText("100") end)
+end
+
+function UIArmorRandomizer:InitCallbacks()
+    self:AddCallback("btn_mode_armor", ui_events.BUTTON_CLICKED, function(s) s:SwitchTab("armor") end, self)
+    self:AddCallback("btn_mode_weapon", ui_events.BUTTON_CLICKED, function(s) s:SwitchTab("weapon") end, self)
+    self:AddCallback("btn_mode_number", ui_events.BUTTON_CLICKED, self.ShowNumberMode, self)
+    self:AddCallback("btn_light", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("light") end, self)
+    self:AddCallback("btn_medium", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("medium") end, self)
+    self:AddCallback("btn_heavy", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("heavy") end, self)
+    self:AddCallback("btn_exo", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("exo") end, self)
+    self:AddCallback("btn_helmet", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("helmet") end, self)
+    self:AddCallback("btn_pistol", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("pistol") end, self)
+    self:AddCallback("btn_smg", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("smg") end, self)
+    self:AddCallback("btn_shotgun", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("shotgun") end, self)
+    self:AddCallback("btn_rifle", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("rifle") end, self)
+    self:AddCallback("btn_sniper", ui_events.BUTTON_CLICKED, function(s) s:ShowCategory("sniper") end, self)
+
+    self:AddCallback("btn_r1", ui_events.BUTTON_CLICKED, function(s) s:SetRadius(1) end, self)
+    self:AddCallback("btn_r3", ui_events.BUTTON_CLICKED, function(s) s:SetRadius(3) end, self)
+    self:AddCallback("btn_r5", ui_events.BUTTON_CLICKED, function(s) s:SetRadius(5) end, self)
+    self:AddCallback("btn_r10", ui_events.BUTTON_CLICKED, function(s) s:SetRadius(10) end, self)
+    self:AddCallback("btn_r15", ui_events.BUTTON_CLICKED, function(s) s:SetRadius(15) end, self)
+
+    self:AddCallback("armor_list", ui_events.LIST_ITEM_SELECT, self.OnArmorSelected, self)
+    self:AddCallback("btn_number_roll", ui_events.BUTTON_CLICKED, self.RollNumber, self)
+    self:AddCallback("btn_random_all", ui_events.BUTTON_CLICKED, self.RollItem, self)
+    self:AddCallback("btn_random_cat", ui_events.BUTTON_CLICKED, self.RollItem, self)
+    self:AddCallback("btn_random_all_w", ui_events.BUTTON_CLICKED, self.RollItem, self)
+    self:AddCallback("btn_random_cat_w", ui_events.BUTTON_CLICKED, self.RollItem, self)
+    self:AddCallback("btn_back", ui_events.BUTTON_CLICKED, self.ShowTabMain, self)
+    self:AddCallback("btn_close", ui_events.BUTTON_CLICKED, self.Close, self)
+end
+
+function UIArmorRandomizer:SetVisibleArmorMain(v)
+    self.btn_light:Show(v); self.btn_medium:Show(v); self.btn_heavy:Show(v); self.btn_exo:Show(v); self.btn_helmet:Show(v)
+end
+function UIArmorRandomizer:SetVisibleWeaponMain(v)
+    self.btn_pistol:Show(v); self.btn_smg:Show(v); self.btn_shotgun:Show(v); self.btn_rifle:Show(v); self.btn_sniper:Show(v)
+end
+function UIArmorRandomizer:HideRandomButtons()
+    self.btn_random_all:Show(false); self.btn_random_cat:Show(false)
+    self.btn_random_all_w:Show(false); self.btn_random_cat_w:Show(false)
+end
+-- CUI3tButton has no SetText here, so each label is its own button; show the one for the current tab/view.
+function UIArmorRandomizer:ShowRandomButton(in_category)
+    self:HideRandomButtons()
+    local btn
+    if self.tab == "weapon" then
+        btn = in_category and self.btn_random_cat_w or self.btn_random_all_w
+    else
+        btn = in_category and self.btn_random_cat or self.btn_random_all
+    end
+    btn:Show(true)
+end
+function UIArmorRandomizer:SetVisibleList(v)
+    self.list_frame:Show(v); self.list_box:Show(v)
+end
+function UIArmorRandomizer:SetVisiblePreview(v)
+    self.preview_frame:Show(v); self.preview_title:Show(v); self.preview_name:Show(v); self.preview_storage:Show(v)
+    self.preview_icon:Show(v and self.preview_entry ~= nil)
+end
+
+function UIArmorRandomizer:ClearPreview()
+    self.preview_entry = nil
+    self.preview_icon:Show(false)
+    if self.tab == "weapon" then
+        self.preview_name:SetText(tr("st_armor_randomizer_preview_empty_weapon", "Select a weapon or use Random."))
+    else
+        self.preview_name:SetText(tr("st_armor_randomizer_preview_empty", "Select armor or use Random."))
+    end
+    self.preview_storage:SetText("")
+end
+
+function UIArmorRandomizer:ShowPreview(entry)
+    if not entry then self:ClearPreview(); return end
+    self.preview_entry = entry
+    self.preview_name:SetText(tostring(entry.name or entry.section or "?"))
+    self.preview_storage:SetText(string.format(tr("st_armor_randomizer_storage_fmt", "Storage: %s"), tostring(entry.storage or "?")))
+
+    local icon = entry.icon or item_icon_info(entry.section)
+    if not icon then
+        self.preview_icon:Show(false)
+        return
+    end
+
+    local ok = pcall(function()
+        self.preview_icon:InitTexture(icon.texture)
+        self.preview_icon:SetTextureRect(Frect():set(icon.x * ICON_CELL, icon.y * ICON_CELL, (icon.x + icon.w) * ICON_CELL, (icon.y + icon.h) * ICON_CELL))
+        self.preview_icon:SetStretchTexture(true)
+
+        local max_w, max_h = 190, 210
+        local src_w, src_h = math.max(icon.w * ICON_CELL, 1), math.max(icon.h * ICON_CELL, 1)
+        local scale = math.min(max_w / src_w, max_h / src_h)
+        local draw_w, draw_h = src_w * scale, src_h * scale
+        local x = 380 + (190 - draw_w) / 2
+        local y = 172 + (210 - draw_h) / 2
+        self.preview_icon:SetWndRect(Frect():set(x, y, x + draw_w, y + draw_h))
+        self.preview_icon:Show(true)
+    end)
+    if not ok then self.preview_icon:Show(false) end
+end
+
+function UIArmorRandomizer:OnArmorSelected()
+    local item = self.list_box:GetSelectedItem()
+    if item and item.entry then self:ShowPreview(item.entry) end
+end
+function UIArmorRandomizer:SetVisibleNumber(v)
+    self.number_from_label:Show(v); self.number_to_label:Show(v); self.edit_from:Show(v); self.edit_to:Show(v); self.btn_number_roll:Show(v)
+end
+
+function UIArmorRandomizer:UpdateRadiusButtons()
+    local buttons = {[1]=self.btn_r1,[3]=self.btn_r3,[5]=self.btn_r5,[10]=self.btn_r10,[15]=self.btn_r15}
+    for _, r in ipairs(RADII) do
+        local label = tostring(r)
+        if r == self.radius then label = "[" .. label .. "]" end
+        pcall(function() buttons[r]:SetText(label) end)
+    end
+end
+
+function UIArmorRandomizer:Rescan()
+    local obj = self.object_id and level.object_by_id(self.object_id) or nil
+    self.scan = scan_storage(obj, self.radius)
+end
+
+function UIArmorRandomizer:SetRadius(radius)
+    self.radius = tonumber(radius) or DEFAULT_RADIUS
+    last_radius = self.radius
+    self:UpdateRadiusButtons()
+    self:Rescan()
+    self.result:SetText("")
+    self:ClearPreview()
+    self:RefreshCurrentView()
+end
+
+function UIArmorRandomizer:AllList()
+    if self.tab == "weapon" then return self.scan.weapon_all or {} end
+    return self.scan.all or {}
+end
+
+function UIArmorRandomizer:UpdateCommonText()
+    if self.tab == "weapon" then
+        self.count:SetText(string.format(tr("st_armor_randomizer_count_fmt_weapon", "Storages: %d | Weapons: %d | Radius: %dm"), self.scan.boxes or 0, #self:AllList(), self.radius))
+    else
+        self.count:SetText(string.format(tr("st_armor_randomizer_count_fmt", "Storages: %d | Armor: %d | Radius: %dm"), self.scan.boxes or 0, #self:AllList(), self.radius))
+    end
+end
+
+function UIArmorRandomizer:SetCategoryButtonText(button, cat)
+    local name = tr(CATEGORY_STRING[cat], CATEGORY_FALLBACK[cat])
+    local n = #(self.scan[cat] or {})
+    pcall(function() button:SetText(string.format("%s (%d)", name, n)) end)
+end
+
+function UIArmorRandomizer:SwitchTab(tab)
+    local changed = (self.tab ~= tab) or self.mode == "number"
+    self.tab = tab
+    last_tab = tab
+    if changed then
+        self.result:SetText("")
+        self:ClearPreview()
+    end
+    self:ShowTabMain()
+end
+
+function UIArmorRandomizer:ShowTabMain()
+    if self.tab == "weapon" then self:ShowWeaponMain() else self:ShowArmorMain() end
+end
+
+function UIArmorRandomizer:ShowArmorMain()
+    self.mode = "armor_main"; self.tab = "armor"; self.category = nil; last_tab = "armor"
+    self:SetVisibleArmorMain(true); self:SetVisibleWeaponMain(false); self:SetVisibleList(false); self:SetVisibleNumber(false); self:SetVisiblePreview(true)
+    self:ShowRandomButton(false); self.btn_back:Show(false)
+    self.mode_hint:SetText(tr("st_armor_randomizer_hint_main", "Choose a category or roll from all found armor."))
+    self:SetCategoryButtonText(self.btn_light, "light")
+    self:SetCategoryButtonText(self.btn_medium, "medium")
+    self:SetCategoryButtonText(self.btn_heavy, "heavy")
+    self:SetCategoryButtonText(self.btn_exo, "exo")
+    self:SetCategoryButtonText(self.btn_helmet, "helmet")
+    self:UpdateCommonText()
+end
+
+function UIArmorRandomizer:ShowWeaponMain()
+    self.mode = "weapon_main"; self.tab = "weapon"; self.category = nil; last_tab = "weapon"
+    self:SetVisibleArmorMain(false); self:SetVisibleWeaponMain(true); self:SetVisibleList(false); self:SetVisibleNumber(false); self:SetVisiblePreview(true)
+    self:ShowRandomButton(false); self.btn_back:Show(false)
+    self.mode_hint:SetText(tr("st_armor_randomizer_hint_main_weapon", "Choose a category or roll from all found weapons."))
+    self:SetCategoryButtonText(self.btn_pistol, "pistol")
+    self:SetCategoryButtonText(self.btn_smg, "smg")
+    self:SetCategoryButtonText(self.btn_shotgun, "shotgun")
+    self:SetCategoryButtonText(self.btn_rifle, "rifle")
+    self:SetCategoryButtonText(self.btn_sniper, "sniper")
+    self:UpdateCommonText()
+end
+
+function UIArmorRandomizer:ShowCategory(cat)
+    self.mode = "category"; self.category = cat
+    self:SetVisibleArmorMain(false); self:SetVisibleWeaponMain(false); self:SetVisibleList(true); self:SetVisibleNumber(false); self:SetVisiblePreview(true)
+    self:ShowRandomButton(true); self.btn_back:Show(true)
+    local name = tr(CATEGORY_STRING[cat], CATEGORY_FALLBACK[cat])
+    self.mode_hint:SetText(string.format(tr("st_armor_randomizer_hint_category", "%s: found %d"), name, #(self.scan[cat] or {})))
+    self.list_box:RemoveAll()
+    local list = self.scan[cat] or {}
+    for i, entry in ipairs(list) do
+        local item = armor_randomizer_list_item(22)
+        item:SetWndSize(vector2():set(314, 22))
+        item.txt:SetWndSize(vector2():set(314, 22))
+        item.txt:SetText(string.format("%d. %s", i, tostring(entry.name)))
+        item.entry = entry
+        self.list_box:AddExistingItem(item)
+    end
+    self:UpdateCommonText()
+end
+
+function UIArmorRandomizer:ShowNumberMode()
+    self.mode = "number"; self.category = nil
+    self:SetVisibleArmorMain(false); self:SetVisibleWeaponMain(false); self:SetVisibleList(false); self:SetVisibleNumber(true); self:SetVisiblePreview(false)
+    self:HideRandomButtons(); self.btn_back:Show(true)
+    self.mode_hint:SetText(tr("st_armor_randomizer_hint_number", "Enter the From and To values and roll a number."))
+    self.count:SetText("")
+end
+
+function UIArmorRandomizer:RefreshCurrentView()
+    if self.mode == "category" and self.category then self:ShowCategory(self.category)
+    elseif self.mode == "number" then self:ShowNumberMode()
+    else self:ShowTabMain() end
+end
+
+function UIArmorRandomizer:RollItem()
+    local list = self:AllList()
+    if self.mode == "category" and self.category then list = self.scan[self.category] or {} end
+    if #list <= 0 then
+        if self.tab == "weapon" then
+            self.result:SetText(tr("st_armor_randomizer_none_weapon", "Nothing found."))
+        else
+            self.result:SetText(tr("st_armor_randomizer_none", "Nothing found."))
+        end
+        self:ClearPreview()
+        return
+    end
+    local entry = list[math.random(1, #list)]
+    self.result:SetText(string.format("%s  <%s>", tostring(entry.name), tostring(entry.storage)))
+    self:ShowPreview(entry)
+end
+
+function UIArmorRandomizer:RollNumber()
+    local from_txt, to_txt = "", ""
+    pcall(function() from_txt = self.edit_from:GetText() end)
+    pcall(function() to_txt = self.edit_to:GetText() end)
+    local a = math.floor(tonumber(from_txt) or 0)
+    local b = math.floor(tonumber(to_txt) or 0)
+    if a > b then a, b = b, a end
+    if a == b then
+        self.result:SetText(tostring(a))
+        return
+    end
+    self.result:SetText(tostring(math.random(a, b)))
+end
+
+function UIArmorRandomizer:TestAndShow(obj_id)
+    self.object_id = obj_id
+    self.radius = last_radius or DEFAULT_RADIUS
+    self:UpdateRadiusButtons()
+    self:Rescan()
+    self.result:SetText("")
+    self.tab = last_tab or "armor"
+    self:ClearPreview()
+    self:ShowTabMain()
+    self:ShowDialog(true)
+    Register_UI("UIArmorRandomizer", "ui_sleep_dialog")
+end
+
+function UIArmorRandomizer:OnKeyboard(dik, keyboard_action)
+    local res = CUIScriptWnd.OnKeyboard(self, dik, keyboard_action)
+    if res == false and keyboard_action == ui_events.WINDOW_KEY_PRESSED and dik == DIK_keys.DIK_ESCAPE then self:Close() end
+    return res
+end
+
+function UIArmorRandomizer:Close()
+    if self:IsShown() then self:HideDialog() end
+    Unregister_UI("UIArmorRandomizer")
+end
+
+function start_dialog(obj_id)
+    if GUI == nil then GUI = UIArmorRandomizer() end
+    GUI:TestAndShow(obj_id)
+end

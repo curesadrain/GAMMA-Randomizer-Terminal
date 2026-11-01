@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<string_table>
+    <string id="st_armor_randomizer_terminal"><text>Терминал-рандомайзер</text></string>
+    <string id="st_armor_randomizer_terminal_descr"><text>Устанавливаемый терминал для случайного выбора чисел, брони и оружия из ближайших хранилищ. Сканирует контейнеры в выбранном радиусе и сортирует найденную броню и оружие по категориям.\n \n%c[ui_white]СВОЙСТВА:\n%c[d_orange] • %c[ui_white]Устанавливается\n%c[d_orange] • %c[ui_white]Радиус сканирования: 1 / 3 / 5 / 10 / 15 м</text></string>
+    <string id="st_armor_randomizer_title"><text>Рандомайзер</text></string>
+    <string id="st_armor_randomizer_radius"><text>Радиус:</text></string>
+    <string id="st_armor_randomizer_hint"><text>Выберите режим.</text></string>
+    <string id="st_armor_randomizer_count"><text>Сканирование...</text></string>
+    <string id="st_armor_randomizer_count_fmt"><text>Хранилищ: %d | Брони: %d | Радиус: %dм</text></string>
+    <string id="st_armor_randomizer_mode_armor"><text>БРОНЯ</text></string>
+    <string id="st_armor_randomizer_mode_number"><text>ЧИСЛО</text></string>
+    <string id="st_armor_randomizer_cat_light"><text>Лёгкая броня</text></string>
+    <string id="st_armor_randomizer_cat_medium"><text>Средняя броня</text></string>
+    <string id="st_armor_randomizer_cat_heavy"><text>Тяжёлая броня</text></string>
+    <string id="st_armor_randomizer_cat_exo"><text>Экзоскелеты</text></string>
+    <string id="st_armor_randomizer_cat_helmet"><text>Шлемы</text></string>
+    <string id="st_armor_randomizer_hint_main"><text>Выберите категорию или случайную броню из всех найденных предметов.</text></string>
+    <string id="st_armor_randomizer_hint_category"><text>%s: найдено %d</text></string>
+    <string id="st_armor_randomizer_hint_number"><text>Введите диапазон «От» и «До» и нажмите кнопку.</text></string>
+    <string id="st_armor_randomizer_from"><text>От:</text></string>
+    <string id="st_armor_randomizer_to"><text>До:</text></string>
+    <string id="st_armor_randomizer_roll_number"><text>ВЫБРАТЬ СЛУЧАЙНОЕ ЧИСЛО</text></string>
+    <string id="st_armor_randomizer_result"><text>РЕЗУЛЬТАТ</text></string>
+    <string id="st_armor_randomizer_roll_all"><text>СЛУЧАЙНАЯ БРОНЯ ИЗ ВСЕХ</text></string>
+    <string id="st_armor_randomizer_roll_category"><text>СЛУЧАЙНАЯ БРОНЯ В КАТЕГОРИИ</text></string>
+    <string id="st_armor_randomizer_none"><text>Подходящей брони не найдено.</text></string>
+    <string id="st_armor_randomizer_back"><text>НАЗАД</text></string>
+    <string id="st_armor_randomizer_close"><text>ЗАКРЫТЬ</text></string>
+
+    <string id="st_armor_randomizer_preview"><text>ПРЕДПРОСМОТР</text></string>
+    <string id="st_armor_randomizer_preview_empty"><text>Выберите броню или нажмите случайный выбор.</text></string>
+    <string id="st_armor_randomizer_storage_fmt"><text>Хранилище: %s</text></string>
+
+    <!-- Weapon tab -->
+    <string id="st_armor_randomizer_mode_weapon"><text>ОРУЖИЕ</text></string>
+    <string id="st_armor_randomizer_cat_pistol"><text>Пистолеты</text></string>
+    <string id="st_armor_randomizer_cat_smg"><text>Пистолеты-пулемёты</text></string>
+    <string id="st_armor_randomizer_cat_shotgun"><text>Дробовики</text></string>
+    <string id="st_armor_randomizer_cat_rifle"><text>Винтовки</text></string>
+    <string id="st_armor_randomizer_cat_sniper"><text>Снайперские винтовки</text></string>
+    <string id="st_armor_randomizer_hint_main_weapon"><text>Выберите категорию или случайное оружие из всего найденного.</text></string>
+    <string id="st_armor_randomizer_count_fmt_weapon"><text>Хранилищ: %d | Оружия: %d | Радиус: %dм</text></string>
+    <string id="st_armor_randomizer_roll_all_weapon"><text>СЛУЧАЙНОЕ ОРУЖИЕ ИЗ ВСЕХ</text></string>
+    <string id="st_armor_randomizer_roll_category_weapon"><text>СЛУЧАЙНОЕ ОРУЖИЕ В КАТЕГОРИИ</text></string>
+    <string id="st_armor_randomizer_none_weapon"><text>Подходящего оружия не найдено.</text></string>
+    <string id="st_armor_randomizer_preview_empty_weapon"><text>Выберите оружие или нажмите случайный выбор.</text></string>
+</string_table>

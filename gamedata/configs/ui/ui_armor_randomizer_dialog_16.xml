@@ -1,0 +1,73 @@
+<w>
+    <background x="212" y="96" width="600" height="576" stretch="1">
+        <texture>ui_inGame2_hint_wnd_main_window</texture>
+    </background>
+
+    <title x="20" y="14" width="360" height="26" stretch="1" complex_desc="0">
+        <text font="letterica18" complex_mode="1" align="l" vert_align="c">st_armor_randomizer_title</text>
+    </title>
+
+    <radius_label x="398" y="16" width="70" height="20" stretch="1" complex_desc="0">
+        <text font="letterica16" complex_mode="1" align="r" vert_align="c">st_armor_randomizer_radius</text>
+    </radius_label>
+
+    <btn_r1 x="472" y="12" width="22" height="26" check_mode="0" stretch="1"><text font="letterica16">1</text><texture>ui_button_ordinary</texture></btn_r1>
+    <btn_r3 x="496" y="12" width="22" height="26" check_mode="0" stretch="1"><text font="letterica16">3</text><texture>ui_button_ordinary</texture></btn_r3>
+    <btn_r5 x="520" y="12" width="22" height="26" check_mode="0" stretch="1"><text font="letterica16">5</text><texture>ui_button_ordinary</texture></btn_r5>
+    <btn_r10 x="544" y="12" width="26" height="26" check_mode="0" stretch="1"><text font="letterica16">10</text><texture>ui_button_ordinary</texture></btn_r10>
+    <btn_r15 x="572" y="12" width="26" height="26" check_mode="0" stretch="1"><text font="letterica16">15</text><texture>ui_button_ordinary</texture></btn_r15>
+
+    <mode_hint x="20" y="48" width="560" height="20" stretch="1" complex_desc="0">
+        <text font="letterica16" complex_mode="1" align="c" vert_align="c">st_armor_randomizer_hint</text>
+    </mode_hint>
+
+    <count x="20" y="72" width="560" height="20" stretch="1" complex_desc="0">
+        <text font="letterica16" complex_mode="1" align="c" vert_align="c">st_armor_randomizer_count</text>
+    </count>
+
+    <btn_mode_armor x="20" y="104" width="132" height="30" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_mode_armor</text><texture>ui_button_ordinary</texture></btn_mode_armor>
+    <btn_mode_weapon x="160" y="104" width="132" height="30" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_mode_weapon</text><texture>ui_button_ordinary</texture></btn_mode_weapon>
+    <btn_mode_number x="300" y="104" width="132" height="30" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_mode_number</text><texture>ui_button_ordinary</texture></btn_mode_number>
+
+    <!-- Armor main: categories occupy the left side, shared preview panel is on the right. -->
+    <btn_light x="20" y="152" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_light</text><texture>ui_button_ordinary</texture></btn_light>
+    <btn_medium x="20" y="194" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_medium</text><texture>ui_button_ordinary</texture></btn_medium>
+    <btn_heavy x="20" y="236" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_heavy</text><texture>ui_button_ordinary</texture></btn_heavy>
+    <btn_exo x="20" y="278" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_exo</text><texture>ui_button_ordinary</texture></btn_exo>
+    <btn_helmet x="20" y="320" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_helmet</text><texture>ui_button_ordinary</texture></btn_helmet>
+
+    <!-- Weapon main: same slots as armor categories (only one set is visible at a time). -->
+    <btn_pistol x="20" y="152" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_pistol</text><texture>ui_button_ordinary</texture></btn_pistol>
+    <btn_smg x="20" y="194" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_smg</text><texture>ui_button_ordinary</texture></btn_smg>
+    <btn_shotgun x="20" y="236" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_shotgun</text><texture>ui_button_ordinary</texture></btn_shotgun>
+    <btn_rifle x="20" y="278" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_rifle</text><texture>ui_button_ordinary</texture></btn_rifle>
+    <btn_sniper x="20" y="320" width="330" height="34" check_mode="0" stretch="1"><text font="letterica16">st_armor_randomizer_cat_sniper</text><texture>ui_button_ordinary</texture></btn_sniper>
+
+    <!-- Category list occupies left half. -->
+    <list_frame x="20" y="150" width="330" height="298"><texture>ui_inGame2_hint_wnd_main_window</texture></list_frame>
+    <list x="28" y="158" width="314" height="282" item_height="22" can_select="1" always_show_scroll="0"><font font="letterica16"/></list>
+
+    <!-- Shared item preview used by category selection and random results. -->
+    <preview_frame x="362" y="150" width="218" height="298"><texture>ui_inGame2_hint_wnd_main_window</texture></preview_frame>
+    <preview_title x="372" y="156" width="198" height="20"><text font="letterica16" align="c" vert_align="c">st_armor_randomizer_preview</text></preview_title>
+    <preview_icon x="380" y="172" width="190" height="210" stretch="1"><texture>ui\ui_icon_equipment</texture></preview_icon>
+    <preview_name x="372" y="386" width="198" height="28"><text font="letterica16" align="c" vert_align="c" complex_mode="1"></text></preview_name>
+    <preview_storage x="372" y="416" width="198" height="24"><text font="letterica16" align="c" vert_align="c" complex_mode="1"></text></preview_storage>
+
+    <number_from_label x="70" y="176" width="100" height="24"><text font="letterica18" align="r" vert_align="c">st_armor_randomizer_from</text></number_from_label>
+    <edit_from x="180" y="172" width="120" height="30" max_symb_count="9"><text font="letterica18" align="c" vert_align="c">1</text></edit_from>
+    <number_to_label x="310" y="176" width="80" height="24"><text font="letterica18" align="r" vert_align="c">st_armor_randomizer_to</text></number_to_label>
+    <edit_to x="400" y="172" width="120" height="30" max_symb_count="9"><text font="letterica18" align="c" vert_align="c">100</text></edit_to>
+    <btn_number_roll x="180" y="220" width="340" height="36" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_roll_number</text><texture>ui_button_ordinary</texture></btn_number_roll>
+
+    <result_label x="20" y="464" width="560" height="22"><text font="letterica16" align="c" vert_align="c">st_armor_randomizer_result</text></result_label>
+    <result x="20" y="488" width="560" height="32"><text font="letterica18" align="c" vert_align="c"></text></result>
+
+    <!-- Two buttons at the same spot: SetText is unavailable on CUI3tButton, so the label is switched by visibility. -->
+    <btn_random_all x="20" y="530" width="300" height="32" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_roll_all</text><texture>ui_button_ordinary</texture></btn_random_all>
+    <btn_random_cat x="20" y="530" width="300" height="32" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_roll_category</text><texture>ui_button_ordinary</texture></btn_random_cat>
+    <btn_random_all_w x="20" y="530" width="300" height="32" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_roll_all_weapon</text><texture>ui_button_ordinary</texture></btn_random_all_w>
+    <btn_random_cat_w x="20" y="530" width="300" height="32" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_roll_category_weapon</text><texture>ui_button_ordinary</texture></btn_random_cat_w>
+    <btn_back x="330" y="530" width="120" height="32" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_back</text><texture>ui_button_ordinary</texture></btn_back>
+    <btn_close x="460" y="530" width="120" height="32" check_mode="0" stretch="1"><text font="letterica18">st_armor_randomizer_close</text><texture>ui_button_ordinary</texture></btn_close>
+</w>
